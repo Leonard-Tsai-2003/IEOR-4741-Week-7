@@ -101,7 +101,7 @@ The table below summarizes which operations each container answers cheaply and w
 #### 1. Pointer Chasing vs. Direct Array Indexing (Q2)
 * **`std::map` / `std::unordered_map`**: `std::map` is implemented as a Red-Black Tree. Finding a price level requires tree traversal over $O(\log L)$ nodes. Each node is individually allocated on the heap via `malloc`. Traversing tree nodes requires loading pointer addresses sequentially, causing repeated L1/L2 cache misses.
 * **Flat Book (`order_book.hpp`)**: Uses a contiguous, price-indexed array layout. Accessing a price level is a single arithmetic offset calculation:
-  $$\text{Address} = \text{Base\_Pointer} + (\text{Tick} \times \text{sizeof(Level)})$$
+  $$\text{Address} = \text{BasePointer} + (\text{Tick} \times \text{sizeof(Level)})$$
   This operation involves zero pointer dereferences, zero heap allocations during runtime, and maximum L1/L2 cache hit rates.
 
 #### 2. Node Overhead & Hardware Cache Lines (Step 2 Analysis)
@@ -125,7 +125,7 @@ A standard CPU cache line is **64 bytes**:
 Benchmark results for symbol lookup (8 symbols, capacity 4096, load factor 0.20%):
 
 $$\text{SymMap::get (Open Addressing): } \mathbf{3.67\text{ ns/op}}$$
-$$\text{std::unordered_map<std::string, uint64_t>::find: } \mathbf{14.44\text{ ns/op}} \quad (\mathbf{3.9\times \text{ slower}})$$
+$$\text{std::unorderedmap<std::string, uint64t>::find: } \mathbf{14.44\text{ ns/op}} \quad (\mathbf{3.9\times \text{ slower}})$$
 
 #### Why `std::unordered_map<std::string, uint64_t>` is 3.9x Slower:
 1. **Heap Allocation & Indirection (`std::string`)**: `std::string` objects exceeding Small String Optimization (SSO) allocate string characters on the heap. Comparing strings during hash collisions requires dereferencing heap pointers, causing additional memory indirection.
